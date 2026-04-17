@@ -55,6 +55,7 @@ def eliminar_categoria(uow: CategoriaUnitOfWork, categoria_id: int) -> bool:
 
     categoria.deleted_at = datetime.now(timezone.utc)
     categoria.updated_at = datetime.now(timezone.utc)
+    categoria.is_active = False
 
     try:
         uow.repository.add(categoria)

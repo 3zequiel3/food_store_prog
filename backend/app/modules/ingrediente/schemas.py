@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from sqlmodel import SQLModel
+from sqlmodel import Field, SQLModel
 
 
 class IngredienteBase(SQLModel):
-    nombre: str
-    descripcion: Optional[str] = None
+    nombre: Annotated[str, Field(min_length=2, max_length=100)]
+    descripcion: Annotated[Optional[str], Field(default=None, max_length=500)]
     es_alergeno: bool = False
 
 
@@ -14,8 +14,8 @@ class IngredienteCreate(IngredienteBase):
 
 
 class IngredienteUpdate(SQLModel):
-    nombre: Optional[str] = None
-    descripcion: Optional[str] = None
+    nombre: Annotated[Optional[str], Field(default=None, min_length=2, max_length=100)]
+    descripcion: Annotated[Optional[str], Field(default=None, max_length=500)]
     es_alergeno: Optional[bool] = None
 
 
