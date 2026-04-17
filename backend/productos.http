@@ -1,0 +1,56 @@
+@baseUrl = http://localhost:8001
+
+### Crear una categoria para relacionar productos
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Bebidas",
+  "descripcion": "Productos liquidos y refrescos"
+}
+
+### Listar categorias
+GET {{baseUrl}}/categorias
+
+### Crear un producto
+POST {{baseUrl}}/productos
+Content-Type: application/json
+
+{
+  "nombre": "Jugo de naranja",
+  "descripcion": "Botella de 1 litro",
+  "precio_base": 2500,
+  "imagen_url": [
+    "https://ejemplo.com/jugo-naranja-1.jpg"
+  ],
+  "disponible": true
+}
+
+### Listar productos
+GET {{baseUrl}}/productos
+
+### Obtener un producto por id
+GET {{baseUrl}}/productos/1
+
+### Actualizar un producto
+PUT {{baseUrl}}/productos/1
+Content-Type: application/json
+
+{
+  "nombre": "Jugo de naranja premium",
+  "descripcion": "Botella de 1 litro sin azucar",
+  "precio_base": 2900,
+  "imagen_url": [
+    "https://ejemplo.com/jugo-naranja-premium.jpg"
+  ],
+  "disponible": true
+}
+
+### Relacionar producto con categoria
+POST {{baseUrl}}/productos/1/categorias/1
+
+### Quitar relacion producto-categoria
+DELETE {{baseUrl}}/productos/1/categorias/1
+
+### Eliminar producto
+DELETE {{baseUrl}}/productos/1

@@ -1,0 +1,15 @@
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/*.so
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+
+backend/.venv
+backend/venv
+backend/.env
+backend/.env.local
