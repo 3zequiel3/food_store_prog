@@ -10,6 +10,8 @@ from app.modules.producto.unit_of_work import ProductoUnitOfWork
 
 def crear_producto(uow: ProductoUnitOfWork, datos: ProductoCreate) -> Producto:
     producto = Producto.model_validate(datos)
+    if producto.stock_cantidad == 0:
+        producto.disponible = False
     uow.repository.add(producto)
     uow.commit()
     uow.refresh(producto)
@@ -34,6 +36,11 @@ def actualizar_producto(
     datos_dict = datos.model_dump(exclude_unset=True)
     for campo, valor in datos_dict.items():
         setattr(producto, campo, valor)
+
+    if producto.stock_cantidad == 0:
+        producto.disponible = False
+    elif producto.stock_cantidad > 0 and not producto.disponible:
+        producto.disponible = True
 
     producto.updated_at = datetime.now(timezone.utc)
 

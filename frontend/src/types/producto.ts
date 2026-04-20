@@ -8,6 +8,7 @@ export interface Producto {
   precio_base: number;
   imagen_url: string[];
   disponible: boolean;
+  stock_cantidad: number;
   categorias: Categoria[];
   ingredientes: Ingrediente[];
 }
@@ -18,6 +19,7 @@ export interface ProductoCreate {
   precio_base: number;
   imagen_url?: string[];
   disponible?: boolean;
+  stock_cantidad?: number;
 }
 
 export interface ProductoUpdate {
@@ -26,4 +28,5 @@ export interface ProductoUpdate {
   precio_base?: number | null;
   imagen_url?: string[] | null;
   disponible?: boolean | null;
+  stock_cantidad?: number | null;
 }

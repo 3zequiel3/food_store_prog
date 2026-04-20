@@ -16,6 +16,7 @@ class ProductoBase(SQLModel):
     precio_base: Annotated[float, Field(gt=0, description="Precio mayor a 0")]
     imagen_url: list[str] = Field(default_factory=list)
     disponible: bool = True
+    stock_cantidad: Annotated[int, Field(default=0, ge=0, description="Stock disponible")] = 0
 
 
 class ProductoCreate(ProductoBase):
@@ -28,6 +29,7 @@ class ProductoUpdate(SQLModel):
     precio_base: Annotated[Optional[float], Field(default=None, gt=0)]
     imagen_url: Optional[list[str]] = None
     disponible: Optional[bool] = None
+    stock_cantidad: Annotated[Optional[int], Field(default=None, ge=0)] = None
 
 
 class ProductoRead(ProductoBase):

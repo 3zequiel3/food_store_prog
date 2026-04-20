@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useProductos } from "../../hooks/useProductos";
 import { useCategorias } from "../../hooks/useCategorias";
 import { useIngredientes } from "../../hooks/useIngredientes";
-import { ProductoList } from "../../components/admin/ProductoList";
-import { ProductoForm } from "../../components/admin/ProductoForm";
+import { ProductoList } from "../../components/admin/Producto/ProductoList";
+import { ProductoForm } from "../../components/admin/Producto/ProductoForm";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import type { Producto } from "../../types/producto";
@@ -50,6 +50,7 @@ export function ProductosPage() {
     precio_base: number;
     imagen_url: string[];
     disponible: boolean;
+    stock_cantidad: number;
     categoriaIds: number[];
     ingredienteIds: number[];
   }) => {
@@ -125,7 +126,6 @@ export function ProductosPage() {
           ingredientes={ingredientes}
           onSubmit={handleSubmit}
           onCancel={closeModal}
-          isLoading={isCreating || isUpdating}
         />
       </Modal>
     </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useIngredientes } from "../../hooks/useIngredientes";
-import { IngredienteList } from "../../components/admin/IngredienteList";
-import { IngredienteForm } from "../../components/admin/IngredienteForm";
+import { IngredienteList } from "../../components/admin/Ingrediente/IngredienteList";
+import { IngredienteForm } from "../../components/admin/Ingrediente/IngredienteForm";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import type { Ingrediente } from "../../types/ingrediente";
@@ -100,7 +100,6 @@ export function IngredientesPage() {
           initialData={editing}
           onSubmit={handleSubmit}
           onCancel={closeModal}
-          isLoading={isCreating || isUpdating}
         />
       </Modal>
     </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCategorias } from "../../hooks/useCategorias";
-import { CategoriaList } from "../../components/admin/CategoriaList";
-import { CategoriaForm } from "../../components/admin/CategoriaForm";
+import { CategoriaList } from "../../components/admin/Categoria/CategoriaList";
+import { CategoriaForm } from "../../components/admin/Categoria/CategoriaForm";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import type { Categoria } from "../../types/categoria";
@@ -99,7 +99,6 @@ export function CategoriasPage() {
           initialData={editing}
           onSubmit={handleSubmit}
           onCancel={closeModal}
-          isLoading={isCreating || isUpdating}
         />
       </Modal>
     </div>
