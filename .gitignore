@@ -13,3 +13,7 @@ backend/.venv
 backend/venv
 backend/.env
 backend/.env.local
+
+docs/*
+docs
+./docs

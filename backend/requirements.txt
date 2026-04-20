@@ -4,3 +4,7 @@ sqlalchemy
 sqlmodel
 python-dotenv
 pymysql
+cryptography
+passlib
+bcrypt
+python-jose

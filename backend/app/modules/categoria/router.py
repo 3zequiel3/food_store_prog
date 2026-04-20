@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 from sqlmodel import Session
 
 from app.core.database import get_session
@@ -34,7 +36,7 @@ def listar_categorias_endpoint(uow: CategoriaUnitOfWork = Depends(get_uow)):
 
 @categoria_router.get("/{categoria_id}", response_model=CategoriaRead)
 def obtener_categoria_endpoint(
-    categoria_id: int, uow: CategoriaUnitOfWork = Depends(get_uow)
+    categoria_id: Annotated[int, Path(gt=0)], uow: CategoriaUnitOfWork = Depends(get_uow)
 ):
     categoria = obtener_categoria_por_id(uow, categoria_id)
     if not categoria:
@@ -44,7 +46,7 @@ def obtener_categoria_endpoint(
 
 @categoria_router.put("/{categoria_id}", response_model=CategoriaRead)
 def actualizar_categoria_endpoint(
-    categoria_id: int,
+    categoria_id: Annotated[int, Path(gt=0)],
     datos: CategoriaUpdate,
     uow: CategoriaUnitOfWork = Depends(get_uow),
 ):
@@ -56,7 +58,7 @@ def actualizar_categoria_endpoint(
 
 @categoria_router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_categoria_endpoint(
-    categoria_id: int, uow: CategoriaUnitOfWork = Depends(get_uow)
+    categoria_id: Annotated[int, Path(gt=0)], uow: CategoriaUnitOfWork = Depends(get_uow)
 ):
     eliminado = eliminar_categoria(uow, categoria_id)
     if not eliminado:

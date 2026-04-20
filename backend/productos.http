@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:8001
+@baseUrl = http://localhost:8003
 
 ### Crear una categoria para relacionar productos
 POST {{baseUrl}}/categorias
@@ -8,7 +8,51 @@ Content-Type: application/json
   "nombre": "Bebidas",
   "descripcion": "Productos liquidos y refrescos"
 }
+### Crear una categoria para relacionar productos
 
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Mecanica",
+  "descripcion": "Productos relacionados con la mecanica"
+}
+### Crear una categoria para relacionar productos
+
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Ropa",
+  "descripcion": "Productos relacionados con la ropa"
+}
+### Crear una categoria para relacionar productos
+
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Electronica",
+  "descripcion": "Productos relacionados con la electronica"
+}
+### Crear una categoria para relacionar productos
+
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Gaming",
+  "descripcion": "Productos relacionados con el gaming"
+}
+### Crear una categoria para relacionar productos
+
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nombre": "Comida",
+  "descripcion": "Productos relacionados con la comida"
+}
 ### Listar categorias
 GET {{baseUrl}}/categorias
 

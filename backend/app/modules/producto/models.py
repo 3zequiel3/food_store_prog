@@ -18,6 +18,7 @@ class Producto(BaseModel, table=True):
     precio_base: float
     imagen_url: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     disponible: bool = True
+    stock_cantidad: int = 0
 
     ingredientes: List["Ingrediente"] = Relationship(
         back_populates="productos",

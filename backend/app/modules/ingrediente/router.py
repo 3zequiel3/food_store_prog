@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 from sqlmodel import Session
 
 from app.core.database import get_session
@@ -34,7 +36,7 @@ def listar_ingredientes_endpoint(uow: IngredienteUnitOfWork = Depends(get_uow)):
 
 @ingrediente_router.get("/{ingrediente_id}", response_model=IngredienteRead)
 def obtener_ingrediente_endpoint(
-    ingrediente_id: int, uow: IngredienteUnitOfWork = Depends(get_uow)
+    ingrediente_id: Annotated[int, Path(gt=0)], uow: IngredienteUnitOfWork = Depends(get_uow)
 ):
     ingrediente = obtener_ingrediente_por_id(uow, ingrediente_id)
     if not ingrediente:
@@ -44,7 +46,7 @@ def obtener_ingrediente_endpoint(
 
 @ingrediente_router.put("/{ingrediente_id}", response_model=IngredienteRead)
 def actualizar_ingrediente_endpoint(
-    ingrediente_id: int,
+    ingrediente_id: Annotated[int, Path(gt=0)],
     datos: IngredienteUpdate,
     uow: IngredienteUnitOfWork = Depends(get_uow),
 ):
@@ -56,7 +58,7 @@ def actualizar_ingrediente_endpoint(
 
 @ingrediente_router.delete("/{ingrediente_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_ingrediente_endpoint(
-    ingrediente_id: int, uow: IngredienteUnitOfWork = Depends(get_uow)
+    ingrediente_id: Annotated[int, Path(gt=0)], uow: IngredienteUnitOfWork = Depends(get_uow)
 ):
     eliminado = eliminar_ingrediente(uow, ingrediente_id)
     if not eliminado:
