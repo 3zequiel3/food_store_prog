@@ -8,13 +8,10 @@ from app.modules.categoria.unit_of_work import CategoriaUnitOfWork
 
 def crear_categoria(uow: CategoriaUnitOfWork, datos: CategoriaCreate) -> Categoria:
     categoria = Categoria.model_validate(datos)
-    try:
+    with uow:
         uow.repository.add(categoria)
         uow.commit()
-    except Exception as e:
-        uow.rollback()
-        raise e
-    uow.refresh(categoria)
+        uow.refresh(categoria)
     return categoria
 
 
@@ -38,13 +35,10 @@ def actualizar_categoria(
         setattr(categoria, campo, valor)
 
     categoria.updated_at = datetime.now(timezone.utc)
-    try:
+    with uow:
         uow.repository.add(categoria)
         uow.commit()
-    except Exception as e:
-        uow.rollback()
-        raise e
-    uow.refresh(categoria)
+        uow.refresh(categoria)
     return categoria
 
 
@@ -57,13 +51,10 @@ def eliminar_categoria(uow: CategoriaUnitOfWork, categoria_id: int) -> bool:
     categoria.updated_at = datetime.now(timezone.utc)
     categoria.is_active = False
 
-    try:
+    with uow:
         uow.repository.add(categoria)
         uow.commit()
-    except Exception as e:
-        uow.rollback()
-        raise e
-    uow.refresh(categoria)
+        uow.refresh(categoria)
     return True
 
 
@@ -84,9 +75,10 @@ def agregar_productos_a_categoria(
         if producto.id not in productos_existentes:
             categoria.productos.append(producto)
 
-    uow.repository.add(categoria)
-    uow.commit()
-    uow.refresh(categoria)
+    with uow:
+        uow.repository.add(categoria)
+        uow.commit()
+        uow.refresh(categoria)
     return categoria
 
 
@@ -104,7 +96,8 @@ def quitar_productos_de_categoria(
         p for p in categoria.productos if p.id not in productos_ids
     ]
 
-    uow.repository.add(categoria)
-    uow.commit()
-    uow.refresh(categoria)
+    with uow:
+        uow.repository.add(categoria)
+        uow.commit()
+        uow.refresh(categoria)
     return categoria
