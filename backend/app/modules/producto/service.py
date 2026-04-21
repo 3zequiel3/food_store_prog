@@ -12,9 +12,10 @@ def crear_producto(uow: ProductoUnitOfWork, datos: ProductoCreate) -> Producto:
     producto = Producto.model_validate(datos)
     if producto.stock_cantidad == 0:
         producto.disponible = False
-    uow.repository.add(producto)
-    uow.commit()
-    uow.refresh(producto)
+    with uow:
+        uow.repository.add(producto)
+        uow.commit()
+        uow.refresh(producto)
     return producto
 
 
@@ -44,9 +45,10 @@ def actualizar_producto(
 
     producto.updated_at = datetime.now(timezone.utc)
 
-    uow.repository.add(producto)
-    uow.commit()
-    uow.refresh(producto)
+    with uow:
+        uow.repository.add(producto)
+        uow.commit()
+        uow.refresh(producto)
     return producto
 
 
@@ -59,8 +61,9 @@ def eliminar_producto(uow: ProductoUnitOfWork, producto_id: int) -> bool:
     producto.updated_at = datetime.now(timezone.utc)
     producto.is_active = False
 
-    uow.repository.add(producto)
-    uow.commit()
+    with uow:
+        uow.repository.add(producto)
+        uow.commit()
     return True
 
 
@@ -72,12 +75,12 @@ def agregar_producto_a_categoria(
         return None
 
     existing = uow.repository.get_link(producto_id, categoria_id)
-    if not existing:
-        link = ProductoCategoriaLink(producto_id=producto_id, categoria_id=categoria_id)
-        uow.repository.add_link(link)
-        uow.commit()
-
-    uow.refresh(producto)
+    with uow:
+        if not existing:
+            link = ProductoCategoriaLink(producto_id=producto_id, categoria_id=categoria_id)
+            uow.repository.add_link(link)
+            uow.commit()
+        uow.refresh(producto)
     return producto
 
 
@@ -88,8 +91,9 @@ def eliminar_producto_de_categoria(
     if not link:
         return None
 
-    uow.repository.delete_link(link)
-    uow.commit()
+    with uow:
+        uow.repository.delete_link(link)
+        uow.commit()
 
     return uow.repository.get_by_id(producto_id)
 
@@ -102,16 +106,16 @@ def agregar_ingrediente_a_producto(
         return None
 
     existing = uow.repository.get_ingrediente_link(producto_id, ingrediente_id)
-    if not existing:
-        link = IngredienteProductoLink(
-            producto_id=producto_id,
-            ingrediente_id=ingrediente_id,
-            es_removible=es_removible,
-        )
-        uow.repository.add_ingrediente_link(link)
-        uow.commit()
-
-    uow.refresh(producto)
+    with uow:
+        if not existing:
+            link = IngredienteProductoLink(
+                producto_id=producto_id,
+                ingrediente_id=ingrediente_id,
+                es_removible=es_removible,
+            )
+            uow.repository.add_ingrediente_link(link)
+            uow.commit()
+        uow.refresh(producto)
     return producto
 
 
@@ -122,7 +126,8 @@ def eliminar_ingrediente_de_producto(
     if not link:
         return None
 
-    uow.repository.delete_ingrediente_link(link)
-    uow.commit()
+    with uow:
+        uow.repository.delete_ingrediente_link(link)
+        uow.commit()
 
     return uow.repository.get_by_id(producto_id)

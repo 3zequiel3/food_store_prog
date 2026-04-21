@@ -7,9 +7,10 @@ from app.modules.ingrediente.unit_of_work import IngredienteUnitOfWork
 
 def crear_ingrediente(uow: IngredienteUnitOfWork, datos: IngredienteCreate) -> Ingrediente:
     ingrediente = Ingrediente.model_validate(datos)
-    uow.repository.add(ingrediente)
-    uow.commit()
-    uow.refresh(ingrediente)
+    with uow:
+        uow.repository.add(ingrediente)
+        uow.commit()
+        uow.refresh(ingrediente)
     return ingrediente
 
 
@@ -34,9 +35,10 @@ def actualizar_ingrediente(
 
     ingrediente.updated_at = datetime.now(timezone.utc)
 
-    uow.repository.add(ingrediente)
-    uow.commit()
-    uow.refresh(ingrediente)
+    with uow:
+        uow.repository.add(ingrediente)
+        uow.commit()
+        uow.refresh(ingrediente)
     return ingrediente
 
 
@@ -48,6 +50,7 @@ def eliminar_ingrediente(uow: IngredienteUnitOfWork, ingrediente_id: int) -> boo
     ingrediente.deleted_at = datetime.now(timezone.utc)
     ingrediente.updated_at = datetime.now(timezone.utc)
 
-    uow.repository.add(ingrediente)
-    uow.commit()
+    with uow:
+        uow.repository.add(ingrediente)
+        uow.commit()
     return True
