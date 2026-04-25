@@ -1,15 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { productoApi } from "../api/producto.api";
+import { productoApi, type ProductoListParams } from "../api/producto.api";
 import type { ProductoCreate, ProductoUpdate } from "../types/producto";
 
 const QUERY_KEY = ["productos"];
 
-export function useProductos() {
+export function useProducto(id: number) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, id],
+    queryFn: () => productoApi.getById(id),
+    enabled: !!id && !Number.isNaN(id),
+  });
+}
+
+export function useProductos(params?: ProductoListParams) {
   const queryClient = useQueryClient();
 
   const productosQuery = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: productoApi.getAll,
+    queryKey: [...QUERY_KEY, params],
+    queryFn: () => productoApi.getAll(params),
   });
 
   const createMutation = useMutation({
@@ -73,7 +81,11 @@ export function useProductos() {
   };
 
   return {
-    productos: productosQuery.data ?? [],
+    productos: productosQuery.data?.items ?? [],
+    total: productosQuery.data?.total ?? 0,
+    skip: productosQuery.data?.skip ?? 0,
+    limit: productosQuery.data?.limit ?? 0,
+    hasNext: productosQuery.data?.has_next ?? false,
     isLoading: productosQuery.isLoading,
     error: productosQuery.error,
     create: createMutation.mutateAsync,

@@ -1,6 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { type ColumnDef } from "@tanstack/react-table";
+import {
+  type ColumnDef,
+  type PaginationState,
+  type SortingState,
+  type OnChangeFn,
+} from "@tanstack/react-table";
 import { DataTable } from "../../ui/Table";
 import { Button } from "../../ui/Button";
 import { ConfirmDialog } from "../../ui/ConfirmDialog";
@@ -11,6 +16,12 @@ interface ProductoListProps {
   onEdit: (producto: Producto) => void;
   onDelete: (id: number) => Promise<void>;
   isDeleting?: boolean;
+  // Pagination / sorting (server-side)
+  total: number;
+  pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
 }
 
 export function ProductoList({
@@ -18,6 +29,11 @@ export function ProductoList({
   onEdit,
   onDelete,
   isDeleting,
+  total,
+  pagination,
+  onPaginationChange,
+  sorting,
+  onSortingChange,
 }: ProductoListProps) {
   const [deleteTarget, setDeleteTarget] = useState<Producto | null>(null);
   const navigate = useNavigate();
@@ -52,6 +68,7 @@ export function ProductoList({
       {
         id: "categorias",
         header: "Categorías",
+        enableSorting: false,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
             {row.original.categorias && row.original.categorias.length > 0 ? (
@@ -73,6 +90,7 @@ export function ProductoList({
         accessorKey: "stock_cantidad",
         header: "Stock",
         size: 90,
+        enableSorting: false,
         cell: ({ row }) => (
           <span
             className={`font-medium ${
@@ -89,6 +107,7 @@ export function ProductoList({
         accessorKey: "disponible",
         header: "Estado",
         size: 112,
+        enableSorting: false,
         cell: ({ row }) => (
           <span
             className={`
@@ -108,6 +127,7 @@ export function ProductoList({
         id: "acciones",
         header: "Acciones",
         size: 208,
+        enableSorting: false,
         cell: ({ row }) => (
           <div className="flex gap-2">
             <Button
@@ -144,6 +164,13 @@ export function ProductoList({
         columns={columns}
         data={productos}
         emptyMessage="No hay productos cargados"
+        manualPagination
+        rowCount={total}
+        pagination={pagination}
+        onPaginationChange={onPaginationChange}
+        manualSorting
+        sorting={sorting}
+        onSortingChange={onSortingChange}
       />
       <ConfirmDialog
         isOpen={!!deleteTarget}

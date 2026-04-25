@@ -1,10 +1,11 @@
-from sqlmodel import Session
-
 from app.core.unit_of_work import UnitOfWork
 from app.modules.categoria.repository import CategoriaRepository
 
 
 class CategoriaUnitOfWork(UnitOfWork):
-    def __init__(self, session: Session):
-        super().__init__(session)
-        self.repository = CategoriaRepository(session)
+    repository: CategoriaRepository
+
+    def __enter__(self):
+        super().__enter__()
+        self.repository = CategoriaRepository(self.session)
+        return self

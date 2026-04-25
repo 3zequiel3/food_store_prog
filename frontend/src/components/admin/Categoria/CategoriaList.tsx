@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+import {
+  type ColumnDef,
+  type PaginationState,
+  type SortingState,
+  type OnChangeFn,
+} from "@tanstack/react-table";
 import { DataTable } from "../../ui/Table";
 import { Button } from "../../ui/Button";
 import { ConfirmDialog } from "../../ui/ConfirmDialog";
@@ -10,6 +15,12 @@ interface CategoriaListProps {
   onEdit: (categoria: Categoria) => void;
   onDelete: (id: number) => Promise<void>;
   isDeleting?: boolean;
+  // Pagination / sorting (server-side)
+  total: number;
+  pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
 }
 
 export function CategoriaList({
@@ -17,8 +28,18 @@ export function CategoriaList({
   onEdit,
   onDelete,
   isDeleting,
+  total,
+  pagination,
+  onPaginationChange,
+  sorting,
+  onSortingChange,
 }: CategoriaListProps) {
   const [deleteTarget, setDeleteTarget] = useState<Categoria | null>(null);
+
+  const nombrePorId = useMemo(
+    () => new Map(categorias.map((c) => [c.id, c.nombre])),
+    [categorias],
+  );
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
@@ -38,8 +59,23 @@ export function CategoriaList({
         ),
       },
       {
+        accessorKey: "parent_id",
+        header: "Padre",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const pid = row.original.parent_id;
+          const nombre = pid != null ? nombrePorId.get(pid) : null;
+          return (
+            <span className="text-[var(--color-muted)]">
+              {nombre ?? "—"}
+            </span>
+          );
+        },
+      },
+      {
         accessorKey: "descripcion",
         header: "Descripción",
+        enableSorting: false,
         cell: ({ row }) => (
           <span className="text-[var(--color-muted)]">
             {row.original.descripcion || "—"}
@@ -50,6 +86,7 @@ export function CategoriaList({
         id: "acciones",
         header: "Acciones",
         size: 160,
+        enableSorting: false,
         cell: ({ row }) => (
           <div className="flex gap-2">
             <Button
@@ -70,7 +107,7 @@ export function CategoriaList({
         ),
       },
     ],
-    [onEdit],
+    [onEdit, nombrePorId],
   );
 
   return (
@@ -79,6 +116,13 @@ export function CategoriaList({
         columns={columns}
         data={categorias}
         emptyMessage="No hay categorías cargadas"
+        manualPagination
+        rowCount={total}
+        pagination={pagination}
+        onPaginationChange={onPaginationChange}
+        manualSorting
+        sorting={sorting}
+        onSortingChange={onSortingChange}
       />
       <ConfirmDialog
         isOpen={!!deleteTarget}

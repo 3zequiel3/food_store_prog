@@ -1,41 +1,48 @@
-import { useState } from "react";
 import { useIngredientes } from "../../hooks/useIngredientes";
+import { useAdminCrudState } from "../../hooks/useAdminCrudState";
+import { useTableFilters } from "../../hooks/useTableFilters";
 import { IngredienteList } from "../../components/admin/Ingrediente/IngredienteList";
 import { IngredienteForm } from "../../components/admin/Ingrediente/IngredienteForm";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import type { Ingrediente } from "../../types/ingrediente";
+import type { IngredienteListParams } from "../../api/ingrediente.api";
+
+type IngredienteSortBy = NonNullable<IngredienteListParams["sort_by"]>;
 
 export function IngredientesPage() {
   const {
+    pagination,
+    setPagination,
+    sorting,
+    setSorting,
+    toQueryParams,
+  } = useTableFilters();
+
+  const queryParams = toQueryParams();
+  const {
     ingredientes,
+    total,
     isLoading,
     error,
     create,
     update,
     remove,
-    isCreating,
-    isUpdating,
     isDeleting,
-  } = useIngredientes();
+  } = useIngredientes({
+    skip: queryParams.skip,
+    limit: queryParams.limit,
+    sort_by: queryParams.sort_by as IngredienteSortBy | undefined,
+    order: queryParams.order,
+  });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Ingrediente | null>(null);
-
-  const openCreate = () => {
-    setEditing(null);
-    setIsModalOpen(true);
-  };
-
-  const openEdit = (ingrediente: Ingrediente) => {
-    setEditing(ingrediente);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditing(null);
-  };
+  const {
+    isModalOpen,
+    editing,
+    openCreate,
+    openEdit,
+    closeModal,
+  } = useAdminCrudState<Ingrediente>();
 
   const handleSubmit = async (data: {
     nombre: string;
@@ -88,6 +95,11 @@ export function IngredientesPage() {
           onEdit={openEdit}
           onDelete={handleDelete}
           isDeleting={isDeleting}
+          total={total}
+          pagination={pagination}
+          onPaginationChange={setPagination}
+          sorting={sorting}
+          onSortingChange={setSorting}
         />
       )}
 

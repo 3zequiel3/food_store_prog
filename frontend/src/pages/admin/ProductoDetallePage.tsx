@@ -1,8 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { productoApi } from "../../api/producto.api";
-import { useProductos } from "../../hooks/useProductos";
+import { useProducto, useProductos } from "../../hooks/useProductos";
 import { ProductoDetalle } from "../../components/ProductoDetalle";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import type { Producto } from "../../types/producto";
@@ -13,15 +11,7 @@ export function ProductoDetallePage() {
   const { remove, isDeleting } = useProductos();
   const [deleteTarget, setDeleteTarget] = useState<Producto | null>(null);
 
-  const {
-    data: producto,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["productos", id],
-    queryFn: () => productoApi.getById(Number(id)),
-    enabled: !!id,
-  });
+  const { data: producto, isLoading, error } = useProducto(Number(id));
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
