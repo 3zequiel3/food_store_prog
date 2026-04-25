@@ -6,7 +6,7 @@ Proyecto integrador del primer parcial de **Programación 4** — Tecnicatura Un
 
 ## 🎥 Video de presentación
 
-🔗 **[LINK AL VIDEO AQUÍ]**
+🔗 (https://drive.google.com/file/d/1xjELB4jVww6c2AG3WLWZtiW1Tbg_J1eE/view?usp=sharing)
 
 ## 🧰 Stack
 
