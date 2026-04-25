@@ -112,9 +112,6 @@ La app corre en el puerto que indique Vite (por defecto `5173`).
 
 Ver [CHECKLIST.md](./CHECKLIST.md) para el cumplimiento punto por punto.
 
-## 📝 Documentación
-
-- [docs/GUION_VIDEO.md](./docs/GUION_VIDEO.md) — Guion del video de presentación.
 
 ## 🗂️ Estructura del repositorio
 
