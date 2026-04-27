@@ -17,7 +17,7 @@ export function ProductoDetalle({
   onBack,
   adminActions,
 }: ProductoDetalleProps) {
-  const images = producto.imagen_url ?? [];
+  const images = producto.imagenes_url ?? [];
   const [activeIdx, setActiveIdx] = useState(0);
 
   const goPrev = () =>

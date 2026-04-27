@@ -1,45 +1,54 @@
-import { useState } from "react";
 import { useCategorias } from "../../hooks/useCategorias";
+import { useAdminCrudState } from "../../hooks/useAdminCrudState";
+import { useTableFilters } from "../../hooks/useTableFilters";
 import { CategoriaList } from "../../components/admin/Categoria/CategoriaList";
 import { CategoriaForm } from "../../components/admin/Categoria/CategoriaForm";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import type { Categoria } from "../../types/categoria";
+import type { CategoriaListParams } from "../../api/categoria.api";
+
+type CategoriaSortBy = NonNullable<CategoriaListParams["sort_by"]>;
 
 export function CategoriasPage() {
   const {
+    pagination,
+    setPagination,
+    sorting,
+    setSorting,
+    toQueryParams,
+  } = useTableFilters();
+
+  const queryParams = toQueryParams();
+  const {
     categorias,
+    total,
     isLoading,
     error,
     create,
     update,
     remove,
-    isCreating,
-    isUpdating,
     isDeleting,
-  } = useCategorias();
+  } = useCategorias({
+    skip: queryParams.skip,
+    limit: queryParams.limit,
+    sort_by: queryParams.sort_by as CategoriaSortBy | undefined,
+    order: queryParams.order,
+  });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Categoria | null>(null);
-
-  const openCreate = () => {
-    setEditing(null);
-    setIsModalOpen(true);
-  };
-
-  const openEdit = (categoria: Categoria) => {
-    setEditing(categoria);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditing(null);
-  };
+  const {
+    isModalOpen,
+    editing,
+    openCreate,
+    openEdit,
+    closeModal,
+  } = useAdminCrudState<Categoria>();
 
   const handleSubmit = async (data: {
     nombre: string;
     descripcion: string;
+    imagen_url: string | null;
+    parent_id: number | null;
   }) => {
     if (editing) {
       await update({ id: editing.id, data });
@@ -87,6 +96,11 @@ export function CategoriasPage() {
           onEdit={openEdit}
           onDelete={handleDelete}
           isDeleting={isDeleting}
+          total={total}
+          pagination={pagination}
+          onPaginationChange={setPagination}
+          sorting={sorting}
+          onSortingChange={setSorting}
         />
       )}
 
@@ -97,6 +111,7 @@ export function CategoriasPage() {
       >
         <CategoriaForm
           initialData={editing}
+          categorias={categorias}
           onSubmit={handleSubmit}
           onCancel={closeModal}
         />

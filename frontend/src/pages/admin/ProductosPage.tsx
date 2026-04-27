@@ -1,16 +1,30 @@
-import { useState } from "react";
 import { useProductos } from "../../hooks/useProductos";
 import { useCategorias } from "../../hooks/useCategorias";
 import { useIngredientes } from "../../hooks/useIngredientes";
+import { useAdminCrudState } from "../../hooks/useAdminCrudState";
+import { useTableFilters } from "../../hooks/useTableFilters";
 import { ProductoList } from "../../components/admin/Producto/ProductoList";
 import { ProductoForm } from "../../components/admin/Producto/ProductoForm";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import type { Producto } from "../../types/producto";
+import type { ProductoListParams } from "../../api/producto.api";
+
+type ProductoSortBy = NonNullable<ProductoListParams["sort_by"]>;
 
 export function ProductosPage() {
   const {
+    pagination,
+    setPagination,
+    sorting,
+    setSorting,
+    toQueryParams,
+  } = useTableFilters();
+
+  const queryParams = toQueryParams();
+  const {
     productos,
+    total,
     isLoading,
     error,
     create,
@@ -18,60 +32,56 @@ export function ProductosPage() {
     remove,
     syncCategorias,
     syncIngredientes,
-    isCreating,
-    isUpdating,
     isDeleting,
-  } = useProductos();
+  } = useProductos({
+    skip: queryParams.skip,
+    limit: queryParams.limit,
+    sort_by: queryParams.sort_by as ProductoSortBy | undefined,
+    order: queryParams.order,
+  });
 
   const { categorias } = useCategorias();
   const { ingredientes } = useIngredientes();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Producto | null>(null);
-
-  const openCreate = () => {
-    setEditing(null);
-    setIsModalOpen(true);
-  };
-
-  const openEdit = (producto: Producto) => {
-    setEditing(producto);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditing(null);
-  };
+  const {
+    isModalOpen,
+    editing,
+    openCreate,
+    openEdit,
+    closeModal,
+  } = useAdminCrudState<Producto>();
 
   const handleSubmit = async (data: {
     nombre: string;
     descripcion: string;
     precio_base: number;
-    imagen_url: string[];
+    imagenes_url: string[];
     disponible: boolean;
     stock_cantidad: number;
-    categoriaIds: number[];
-    ingredienteIds: number[];
+    categorias_ids: number[];
+    ingredientes_ids: number[];
   }) => {
-    const { categoriaIds, ingredienteIds, ...productoData } = data;
+    const { categorias_ids, ingredientes_ids, ...productoData } = data;
 
-    if (editing) {
-      await update({ id: editing.id, data: productoData });
-      const currentCatIds = editing.categorias?.map((c) => c.id) ?? [];
-      await syncCategorias(editing.id, currentCatIds, categoriaIds);
-      const currentIngIds = editing.ingredientes?.map((i) => i.id) ?? [];
-      await syncIngredientes(editing.id, currentIngIds, ingredienteIds);
-    } else {
-      const nuevo = await create(productoData);
-      if (categoriaIds.length > 0) {
-        await syncCategorias(nuevo.id, [], categoriaIds);
+    try {
+      if (editing) {
+        await update({ id: editing.id, data: productoData });
+        const currentCatIds = editing.categorias?.map((c) => c.id) ?? [];
+        await syncCategorias(editing.id, currentCatIds, categorias_ids);
+        const currentIngIds = editing.ingredientes?.map((i) => i.id) ?? [];
+        await syncIngredientes(editing.id, currentIngIds, ingredientes_ids);
+      } else {
+        await create({
+          ...productoData,
+          categorias_ids,
+          ingredientes_ids,
+        });
       }
-      if (ingredienteIds.length > 0) {
-        await syncIngredientes(nuevo.id, [], ingredienteIds);
-      }
+      closeModal();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error desconocido";
+      alert(`Error al guardar el producto: ${message}`);
     }
-    closeModal();
   };
 
   const handleDelete = async (id: number) => {
@@ -112,6 +122,11 @@ export function ProductosPage() {
           onEdit={openEdit}
           onDelete={handleDelete}
           isDeleting={isDeleting}
+          total={total}
+          pagination={pagination}
+          onPaginationChange={setPagination}
+          sorting={sorting}
+          onSortingChange={setSorting}
         />
       )}
 

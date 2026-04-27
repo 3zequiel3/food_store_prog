@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+import {
+  type ColumnDef,
+  type PaginationState,
+  type SortingState,
+  type OnChangeFn,
+} from "@tanstack/react-table";
 import { DataTable } from "../../ui/Table";
 import { Button } from "../../ui/Button";
 import { ConfirmDialog } from "../../ui/ConfirmDialog";
@@ -10,6 +15,12 @@ interface IngredienteListProps {
   onEdit: (ingrediente: Ingrediente) => void;
   onDelete: (id: number) => Promise<void>;
   isDeleting?: boolean;
+  // Pagination / sorting (server-side)
+  total: number;
+  pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  sorting: SortingState;
+  onSortingChange: OnChangeFn<SortingState>;
 }
 
 export function IngredienteList({
@@ -17,6 +28,11 @@ export function IngredienteList({
   onEdit,
   onDelete,
   isDeleting,
+  total,
+  pagination,
+  onPaginationChange,
+  sorting,
+  onSortingChange,
 }: IngredienteListProps) {
   const [deleteTarget, setDeleteTarget] = useState<Ingrediente | null>(null);
 
@@ -40,6 +56,7 @@ export function IngredienteList({
       {
         accessorKey: "descripcion",
         header: "Descripción",
+        enableSorting: false,
         cell: ({ row }) => (
           <span className="text-[var(--color-muted)]">
             {row.original.descripcion || "—"}
@@ -47,9 +64,24 @@ export function IngredienteList({
         ),
       },
       {
+        accessorKey: "es_alergeno",
+        header: "Alérgeno",
+        size: 120,
+        enableSorting: false,
+        cell: ({ row }) =>
+          row.original.es_alergeno ? (
+            <span className="text-[10px] font-semibold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded">
+              Alérgeno
+            </span>
+          ) : (
+            <span className="text-[var(--color-muted)]">—</span>
+          ),
+      },
+      {
         id: "acciones",
         header: "Acciones",
         size: 160,
+        enableSorting: false,
         cell: ({ row }) => (
           <div className="flex gap-2">
             <Button
@@ -79,6 +111,13 @@ export function IngredienteList({
         columns={columns}
         data={ingredientes}
         emptyMessage="No hay ingredientes cargados"
+        manualPagination
+        rowCount={total}
+        pagination={pagination}
+        onPaginationChange={onPaginationChange}
+        manualSorting
+        sorting={sorting}
+        onSortingChange={onSortingChange}
       />
       <ConfirmDialog
         isOpen={!!deleteTarget}

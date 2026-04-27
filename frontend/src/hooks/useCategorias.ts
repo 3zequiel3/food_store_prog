@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { categoriaApi } from "../api/categoria.api";
+import { categoriaApi, type CategoriaListParams } from "../api/categoria.api";
 import type { CategoriaCreate, CategoriaUpdate } from "../types/categoria";
 
 const QUERY_KEY = ["categorias"];
 
-export function useCategorias() {
+export function useCategorias(params?: CategoriaListParams) {
   const queryClient = useQueryClient();
 
   const categoriasQuery = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: categoriaApi.getAll,
+    queryKey: [...QUERY_KEY, params],
+    queryFn: () => categoriaApi.getAll(params),
   });
 
   const createMutation = useMutation({
@@ -35,7 +35,11 @@ export function useCategorias() {
   });
 
   return {
-    categorias: categoriasQuery.data ?? [],
+    categorias: categoriasQuery.data?.items ?? [],
+    total: categoriasQuery.data?.total ?? 0,
+    skip: categoriasQuery.data?.skip ?? 0,
+    limit: categoriasQuery.data?.limit ?? 0,
+    hasNext: categoriasQuery.data?.has_next ?? false,
     isLoading: categoriasQuery.isLoading,
     error: categoriasQuery.error,
     create: createMutation.mutateAsync,

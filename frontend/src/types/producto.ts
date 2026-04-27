@@ -6,7 +6,7 @@ export interface Producto {
   nombre: string;
   descripcion: string | null;
   precio_base: number;
-  imagen_url: string[];
+  imagenes_url: string[];
   disponible: boolean;
   stock_cantidad: number;
   categorias: Categoria[];
@@ -17,16 +17,18 @@ export interface ProductoCreate {
   nombre: string;
   descripcion?: string | null;
   precio_base: number;
-  imagen_url?: string[];
+  imagenes_url?: string[];
   disponible?: boolean;
   stock_cantidad?: number;
+  categorias_ids: number[];
+  ingredientes_ids: number[];
 }
 
 export interface ProductoUpdate {
   nombre?: string | null;
   descripcion?: string | null;
   precio_base?: number | null;
-  imagen_url?: string[] | null;
+  imagenes_url?: string[] | null;
   disponible?: boolean | null;
   stock_cantidad?: number | null;
 }

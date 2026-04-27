@@ -3,7 +3,7 @@ uvicorn
 sqlalchemy
 sqlmodel
 python-dotenv
-pymysql
+psycopg[binary]
 cryptography
 passlib
 bcrypt

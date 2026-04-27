@@ -1,44 +1,54 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
-from sqlmodel import Session
+from fastapi import APIRouter, HTTPException, Path, Query, Response, status
 
-from app.core.database import get_session
+from app.core.exceptions import NombreYaExiste
+from app.core.schemas import Page
 from app.modules.ingrediente.schemas import IngredienteCreate, IngredienteRead, IngredienteUpdate
-from app.modules.ingrediente.service import (
-    actualizar_ingrediente,
-    crear_ingrediente,
-    eliminar_ingrediente,
-    listar_ingredientes,
-    obtener_ingrediente_por_id,
-)
-from app.modules.ingrediente.unit_of_work import IngredienteUnitOfWork
+from app.modules.ingrediente.service import IngredienteService
 
 
 ingrediente_router = APIRouter(prefix="/ingredientes", tags=["Ingredientes"])
-
-
-def get_uow(session: Session = Depends(get_session)) -> IngredienteUnitOfWork:
-    return IngredienteUnitOfWork(session)
+_service = IngredienteService()
 
 
 @ingrediente_router.post("", response_model=IngredienteRead, status_code=status.HTTP_201_CREATED)
-def crear_ingrediente_endpoint(
-    datos: IngredienteCreate, uow: IngredienteUnitOfWork = Depends(get_uow)
+def crear_ingrediente_endpoint(datos: IngredienteCreate):
+    try:
+        return _service.crear(datos)
+    except NombreYaExiste as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
+@ingrediente_router.get("", response_model=Page[IngredienteRead])
+def listar_ingredientes_endpoint(
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(gt=0, le=100)] = 20,
+    nombre: Annotated[str | None, Query(min_length=1, max_length=100)] = None,
+    es_alergeno: Annotated[bool | None, Query()] = None,
+    sort_by: Annotated[Literal["nombre", "created_at"], Query()] = "nombre",
+    order: Annotated[Literal["asc", "desc"], Query()] = "asc",
 ):
-    return crear_ingrediente(uow, datos)
-
-
-@ingrediente_router.get("", response_model=list[IngredienteRead])
-def listar_ingredientes_endpoint(uow: IngredienteUnitOfWork = Depends(get_uow)):
-    return listar_ingredientes(uow)
+    items, total = _service.listar(
+        skip=skip,
+        limit=limit,
+        nombre=nombre,
+        es_alergeno=es_alergeno,
+        sort_by=sort_by,
+        order=order,
+    )
+    return Page[IngredienteRead](
+        items=[IngredienteRead.model_validate(i) for i in items],
+        total=total,
+        skip=skip,
+        limit=limit,
+        has_next=(skip + limit) < total,
+    )
 
 
 @ingrediente_router.get("/{ingrediente_id}", response_model=IngredienteRead)
-def obtener_ingrediente_endpoint(
-    ingrediente_id: Annotated[int, Path(gt=0)], uow: IngredienteUnitOfWork = Depends(get_uow)
-):
-    ingrediente = obtener_ingrediente_por_id(uow, ingrediente_id)
+def obtener_ingrediente_endpoint(ingrediente_id: Annotated[int, Path(gt=0)]):
+    ingrediente = _service.obtener_por_id(ingrediente_id)
     if not ingrediente:
         raise HTTPException(status_code=404, detail="Ingrediente no encontrado")
     return ingrediente
@@ -48,19 +58,19 @@ def obtener_ingrediente_endpoint(
 def actualizar_ingrediente_endpoint(
     ingrediente_id: Annotated[int, Path(gt=0)],
     datos: IngredienteUpdate,
-    uow: IngredienteUnitOfWork = Depends(get_uow),
 ):
-    ingrediente = actualizar_ingrediente(uow, ingrediente_id, datos)
+    try:
+        ingrediente = _service.actualizar(ingrediente_id, datos)
+    except NombreYaExiste as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     if not ingrediente:
         raise HTTPException(status_code=404, detail="Ingrediente no encontrado")
     return ingrediente
 
 
 @ingrediente_router.delete("/{ingrediente_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_ingrediente_endpoint(
-    ingrediente_id: Annotated[int, Path(gt=0)], uow: IngredienteUnitOfWork = Depends(get_uow)
-):
-    eliminado = eliminar_ingrediente(uow, ingrediente_id)
+def eliminar_ingrediente_endpoint(ingrediente_id: Annotated[int, Path(gt=0)]):
+    eliminado = _service.eliminar(ingrediente_id)
     if not eliminado:
         raise HTTPException(status_code=404, detail="Ingrediente no encontrado")
     return Response(status_code=status.HTTP_204_NO_CONTENT)

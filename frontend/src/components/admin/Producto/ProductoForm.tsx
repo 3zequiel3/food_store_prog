@@ -78,11 +78,11 @@ interface ProductoFormProps {
     nombre: string;
     descripcion: string;
     precio_base: number;
-    imagen_url: string[];
+    imagenes_url: string[];
     disponible: boolean;
     stock_cantidad: number;
-    categoriaIds: number[];
-    ingredienteIds: number[];
+    categorias_ids: number[];
+    ingredientes_ids: number[];
   }) => void;
   onCancel: () => void;
 }
@@ -96,21 +96,25 @@ export function ProductoForm({
 }: ProductoFormProps) {
   const isEditing = !!initialData;
 
+  // Regla de negocio: los productos SOLO pueden asociarse a subcategorías
+  // (hojas del árbol). Excluimos las categorías raíz (parent_id === null).
+  const subcategorias = categorias.filter((c) => c.parent_id !== null);
+
   const form = useForm({
     defaultValues: {
       nombre: initialData?.nombre ?? "",
       descripcion: initialData?.descripcion ?? "",
       precio_base: initialData ? String(initialData.precio_base) : "",
-      imagen_url: initialData?.imagen_url.join(", ") ?? "",
+      imagenes_url: initialData?.imagenes_url.join(", ") ?? "",
       disponible: initialData?.disponible ?? true,
       stock_cantidad: initialData ? String(initialData.stock_cantidad) : "",
-      categoriaIds:
+      categorias_ids:
         initialData?.categorias?.map((c) => c.id) ?? ([] as number[]),
-      ingredienteIds:
+      ingredientes_ids:
         initialData?.ingredientes?.map((i) => i.id) ?? ([] as number[]),
     },
     onSubmit: async ({ value }) => {
-      const urls = value.imagen_url
+      const urls = value.imagenes_url
         .split(",")
         .map((u) => u.trim())
         .filter(Boolean);
@@ -119,11 +123,11 @@ export function ProductoForm({
         nombre: value.nombre.trim(),
         descripcion: value.descripcion.trim(),
         precio_base: parseFloat(value.precio_base),
-        imagen_url: urls,
+        imagenes_url: urls,
         disponible: value.disponible,
         stock_cantidad: parseInt(value.stock_cantidad, 10),
-        categoriaIds: value.categoriaIds,
-        ingredienteIds: value.ingredienteIds,
+        categorias_ids: value.categorias_ids,
+        ingredientes_ids: value.ingredientes_ids,
       });
     },
   });
@@ -183,7 +187,7 @@ export function ProductoForm({
         )}
       </form.Field>
 
-      <form.Field name="imagen_url">
+      <form.Field name="imagenes_url">
         {(field) => (
           <FieldInput
             field={field}
@@ -217,7 +221,7 @@ export function ProductoForm({
 
       {/* Selector de categorías */}
       <form.Field
-        name="categoriaIds"
+        name="categorias_ids"
         validators={{
           onChange: ({ value }) =>
             value.length === 0
@@ -240,11 +244,11 @@ export function ProductoForm({
               <Select<SelectOption, true>
                 inputId="categorias-select"
                 isMulti
-                options={categorias.map((c) => ({
+                options={subcategorias.map((c) => ({
                   value: c.id,
                   label: c.nombre,
                 }))}
-                value={categorias
+                value={subcategorias
                   .filter((c) => field.state.value.includes(c.id))
                   .map((c) => ({ value: c.id, label: c.nombre }))}
                 onChange={(opts) =>
@@ -252,9 +256,15 @@ export function ProductoForm({
                 }
                 onBlur={field.handleBlur}
                 placeholder="Seleccioná categorías…"
-                noOptionsMessage={() => "No hay categorías"}
+                noOptionsMessage={() =>
+                  "No hay subcategorías disponibles"
+                }
                 styles={selectStyles}
               />
+              <span className="text-xs text-[var(--color-muted)]">
+                Solo se muestran subcategorías. Los productos se asocian a
+                hojas del árbol.
+              </span>
               {errors.length > 0 && (
                 <span className="text-xs text-red-500">
                   {errors.join(", ")}
@@ -267,7 +277,7 @@ export function ProductoForm({
 
       {/* Selector de ingredientes */}
       <form.Field
-        name="ingredienteIds"
+        name="ingredientes_ids"
         validators={{
           onChange: ({ value }) =>
             value.length === 0

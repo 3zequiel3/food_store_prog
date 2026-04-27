@@ -1,5 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ingredienteApi } from "../api/ingrediente.api";
+import {
+  ingredienteApi,
+  type IngredienteListParams,
+} from "../api/ingrediente.api";
 import type {
   IngredienteCreate,
   IngredienteUpdate,
@@ -7,12 +10,12 @@ import type {
 
 const QUERY_KEY = ["ingredientes"];
 
-export function useIngredientes() {
+export function useIngredientes(params?: IngredienteListParams) {
   const queryClient = useQueryClient();
 
   const ingredientesQuery = useQuery({
-    queryKey: QUERY_KEY,
-    queryFn: ingredienteApi.getAll,
+    queryKey: [...QUERY_KEY, params],
+    queryFn: () => ingredienteApi.getAll(params),
   });
 
   const createMutation = useMutation({
@@ -38,7 +41,11 @@ export function useIngredientes() {
   });
 
   return {
-    ingredientes: ingredientesQuery.data ?? [],
+    ingredientes: ingredientesQuery.data?.items ?? [],
+    total: ingredientesQuery.data?.total ?? 0,
+    skip: ingredientesQuery.data?.skip ?? 0,
+    limit: ingredientesQuery.data?.limit ?? 0,
+    hasNext: ingredientesQuery.data?.has_next ?? false,
     isLoading: ingredientesQuery.isLoading,
     error: ingredientesQuery.error,
     create: createMutation.mutateAsync,

@@ -17,7 +17,12 @@ class BaseRepository(Generic[E]):
         self.session.add(entity)
 
     def get_by_id(self, entity_id: int) -> Optional[E]:
-        return self.session.get(self.model, entity_id)
+        return self.session.exec(
+            select(self.model).where(
+                self.model.id == entity_id,
+                self.model.deleted_at == None,  # noqa: E711
+            )
+        ).first()
 
     def list_active(self) -> List[E]:
         return list(
